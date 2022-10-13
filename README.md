@@ -1,29 +1,32 @@
 # SketchPolymer
 
-This repository contains the C++ implementation of SketchPolymer, a data structure to (). We compare different aspects of performance of SketchPolymer and other quantiles sketches. 
+This repository contains the C++ implementation of SketchPolymer, a data structure for per-flow tail latency estimation. We compare different aspects of performance of SketchPolymer and other quantiles sketches. 
 
 
 
-##Project Structure
+## Project Structure
 
 ```
-├─baseline------------source code of baseline
+├─CPU_src
+│  ├─baseline------------source code of baseline
+│  │
+│  ├─dataset-------------contains different datasets to test SketchPolymer
+│  │
+│  ├─dd------------------source code of DDSketch
+│  │
+│  ├─gk------------------source code of Greenwald Khanna (GK) sketch
+│  │
+│  ├─kll-----------------source code of KLL Sketch
+│  │
+│  ├─parameter_verify----To find the best parameters of SketchPolymer 
+│  │
+│  └─SketchPolymer-------source code of SketchPolymer
+│    
+├─FPGA_src----FPGA implementation of SketchPolymer
+│  ├─rtl
+│  └─sim
 │  
-├─dataset-------------contains different datasets to test SketchPolymer
-│  
-├─dd------------------source code of DDSketch
-│  
-├─gk------------------source code of Greenwald Khanna (GK) sketch
-│ 
-├─kll-----------------source code of KLL Sketch
-│  
-├─parameter_verify----To find the best parameters of SketchPolymer 
-│  
-├─SketchPolymer-------source code of SketchPolymer
-│  
-├─FPGA_distri_sketch_anonymously.zip----FPGA implementation of SketchPolymer
-│  
-├─SketchPolymer.p4----P4 implementation of SketchPolymer
+└─P4_src----P4 implementation of SketchPolymer
 ```
 
 
@@ -58,9 +61,9 @@ In SketchPolymer/Param.h, you can change the parameters of SketchPolymer.
 
 ```
 An example
-log_base=1.5 log base = 1.5
-h1=3 stage 1 will use 3 hash functions
-mem3=0.8 stage 3 will use 80% of memory that assign to SketchPolymer
+log_base=1.5 --- log base = 1.5
+h1=3 ---  stage 1 will use 3 hash functions
+mem3=0.8 ---  stage 3 will use 80% of memory that assign to SketchPolymer
 ```
 
 For baseline / DDSketch / SketchPolymer, if you want to assign the total memory as 8000:
