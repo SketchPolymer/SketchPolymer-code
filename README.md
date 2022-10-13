@@ -4,7 +4,7 @@ This repository contains the C++ implementation of SketchPolymer, a data structu
 
 
 
-##Project Structure
+## Project Structure
 
 ```
 ├─baseline------------source code of baseline
