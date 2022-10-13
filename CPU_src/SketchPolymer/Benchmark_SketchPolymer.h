@@ -45,7 +45,7 @@ public:
             {
                 for (int i=0;i<99;i++)
                 {
-                    dataset[index].id=index % (9801) * 41 + 41; //use node i to node j as id
+                    dataset[index].id=index % (9801) * 41 + 41; //use [node i to node j] as id
                     dataset[index].timestamp=num[index];
                     index++;
                 }   
