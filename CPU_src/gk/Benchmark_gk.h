@@ -94,6 +94,147 @@ public:
 };
 
 
+struct Seattle_Tuple {
+    uint64_t timestamp;
+    uint64_t id;
+};
+
+class SeattleBenchmark 
+{
+public:
+    SeattleBenchmark(std::string PATH) 
+    {
+        std::cout<<"dataset = "<<PATH<<std::endl;
+
+        int datalen=0;
+        std::vector<double> num;
+
+        std::ifstream file(PATH.c_str());
+        while( ! file.eof() )
+        {
+            double temp;
+            file>>temp;
+            num.push_back(temp*100000);
+            datalen++;
+        }
+        file.close();
+        std::cout<<datalen<<" "<<num.size()<<"\n";
+
+        //seattle: 688file, each file has 99*99 item
+
+        dataset = new Seattle_Tuple[datalen];
+        int index = 0;
+        for (int filenum=0;filenum<688;filenum++)
+        {
+            for (int flow_id=0;flow_id<99;flow_id++)
+            {
+                for (int i=0;i<99;i++)
+                {
+                    dataset[index].id=index % (9801) * 41 + 41;
+                    dataset[index].timestamp=num[index];
+                    index++;
+                }   
+                  
+            }
+        }
+        std::cout<<"index="<<index<<", datalen="<<datalen<<std::endl;
+        //printf("dataset_len=%d, index=%d, large=%d, mid=%d, small=%d\n",datalen,index,large_stream,mid_stream,small_stream);
+        
+        length = datalen;
+
+    }
+    ~SeattleBenchmark() {}
+
+    void Run(uint32_t memory, double eps)
+    {
+        uint32_t running_length = length;
+
+        compare_gk<uint64_t>* gk_sketch = new  compare_gk<uint64_t>(memory,eps,running_length);
+
+        CorrectDetector<uint64_t>* correct_detector = new CorrectDetector<uint64_t>(); 
+        std::map<uint64_t, uint32_t> id_map;
+        std::set<uint64_t> id_set;
+
+        clock_t begin,finish;
+        clock_t total=0;
+        double totaltime;
+        uint32_t actual_length=0;
+
+        for (int i = 0; i < running_length; ++i) 
+        {
+            if (i % (1000000) ==0) printf("i = %d\n",i);
+            if (dataset[i].timestamp == 0) continue; 
+
+            actual_length++;
+
+            if (id_set.find(dataset[i].id) == id_set.end()) 
+            {
+                id_set.insert(dataset[i].id);
+                id_map[dataset[i].id] = 0;
+            }
+            id_map[dataset[i].id]++;
+
+            #ifdef TIME_BASED
+            if (id_map[dataset[i].id] > 1) 
+            {
+                correct_detector->insert(dataset[i].id, 0, dataset[i].timestamp);
+
+                begin=clock();
+                gk_sketch->insert(dataset[i].id, dataset[i].timestamp);
+                finish=clock();
+
+                total += finish-begin;
+            }
+            #else
+            if (id_map[dataset[i].id] > 1) 
+            {
+                //correct_detector->insert(dataset[i].id, last_time[dataset[i].id], i);
+                //gk_sketch->insert(dataset[i].id, last_time[dataset[i].id], i);
+            }
+            #endif
+        }
+        
+        totaltime=(double)(total)/CLOCKS_PER_SEC;
+        std::cout <<"time taken: "<<totaltime<<" seconds"<< std::endl;
+        double throughput = double(actual_length) / totaltime;
+        std::cout <<"throughput: "<<std::fixed<<std::setprecision(4)<< throughput <<" item/s"<< std::endl;
+
+        double log_error = 0;
+        int num = 0;
+        double query_w = 0.95;
+        for (auto i : id_map) 
+        {
+            if (i.second < 500)
+                continue;
+            num++;
+
+            uint64_t predict = gk_sketch->query(i.first, query_w);
+            uint64_t truth = correct_detector->query(i.first, query_w);
+            log_error += fabs( log2(predict) - log2(truth) );
+
+            // std::cout << log2(predict) << " " << log2(truth) << " " << "\n";
+            // assert(0);
+            // printf("id=%lu, predict=%lu, truth=%lu, relative_error=%f \n",i.first,predict,truth,relative_error);
+            // if (num==20) break;
+        }
+        std::cout << "Estimate: " << num << "\n";
+        std::cout << "Average Log Error: " << log_error / num << "\n";
+        std::cout << "query_w: " << query_w<< "\n";
+
+        gk_sketch->print_status();
+
+        std::cout << "\n";
+
+    }
+
+//private:
+    std::string filename;
+    LoadResult load_result;
+    Seattle_Tuple* dataset;
+    uint64_t length;
+};
+
+
 struct Webget_Tuple {
     uint64_t timestamp;
     uint64_t id;

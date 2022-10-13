@@ -14,6 +14,7 @@ int main(int argc, char** argv)
     string path_webget = "../dataset/5_zendo/webget-all-simplify.dat";
     string path_seattle = "../dataset/Seattle/SeattleData_all";
 
+    SeattleBenchmark benchmark(path_seattle);
     //WebgetBenchmark benchmark(path_webget);
     //CAIDABenchmark benchmark(path_caida);
     benchmark.Run(atoi(argv[1]),stod(argv[2]));

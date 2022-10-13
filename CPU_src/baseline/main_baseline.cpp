@@ -16,8 +16,9 @@ int main(int argc, char** argv)
     std::string path_seattle = "../dataset/Seattle/SeattleData_all";
     std::string path_webget = "../dataset/5_zendo/webget-all-simplify.dat";
     
+    SeattleBenchmark benchmark(path_seattle);
     //WebgetBenchmark benchmark(path_webget);
-    CAIDABenchmark benchmark(path_caida);
+    //CAIDABenchmark benchmark(path_caida);
 
     benchmark.Run(atoi(argv[1]));
 
