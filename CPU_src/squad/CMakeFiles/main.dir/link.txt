@@ -1,0 +1,1 @@
+/usr/bin/c++  -m32 -O2 -g   CMakeFiles/main.dir/main.cc.o CMakeFiles/main.dir/lossycountwSgk.cc.o CMakeFiles/main.dir/prng.cc.o CMakeFiles/main.dir/rand48.cc.o  -o main 
